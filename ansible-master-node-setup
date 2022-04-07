@@ -1,0 +1,100 @@
+sudo yum update 
+
+installing of EPEL package 
+------------------------------------------
+sudo yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
+sudo yum install ansible
+
+to check ansible is installed or not 
+ansible --version
+
+ansible configuration file path -------> /etc/ansible/ansible.cfg
+
+ansible  executable location -----> /usr/bin/ansible
+
+create a user in ansible master machine 
+eg: useradd anisbleuser
+
+After creating the user in ansible master machine then give sudo permissions to that user
+
+visudo
+--------------------------------------------------------------------------------------------------
+## Read drop-in files from /etc/sudoers.d (the # here does not mean a comment)
+#includedir /etc/sudoers.d
+ec2-user        ALL=(ALL)       NOPASSWD: ALL
+anisbleuser     ALL=(ALL)       NOPASSWD: ALL
+---------------------------------------------------------------------------------------------------
+After that cd /etc/ssh
+
+vi sshd_config
+---------------------------------------
+# To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication yes
+#PermitEmptyPasswords no
+#PasswordAuthentication no
+-------------------------------------------
+
+login to the anisble node machines and follow the below process
+
+useradd anisblenode1
+Give sudo permissions to the created user in visudo file under wheel group
+-------------------------------------
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+an-node1    ALL=(ALL)       ALL
+--------------------------------------
+After that cd /etc/ssh
+
+vi sshd_config
+---------------------------------------
+# To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication yes
+#PermitEmptyPasswords no
+#PasswordAuthentication no
+-------------------------------------------
+DO THE SAME FOR OTHER ANISBLE NODE MACHINES 
+
+Go to the ansible master machine 
+ssh-keygen
+
+systemctl restart sshd on ansible master machine as well as node machines too.(not ssh-keygen only systemctl restart sshd)
+
+By using this command we can make communication b//w master and nodes in ansible 
+
+ssh-copy-id nodemachines publicip(or)privateip
+After this we will get like this
+--------------------------------------
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh '172.31.95.172'"
+and check to make sure that only the key(s) you wanted were added.
+---------------------------------------
+After this if we want to login to the node machines
+ssh publicip (or) privateip of nodes
+----------------------------------------------------------------------------------------------------------------
+
+/etc/ansible under this we are having a file called "hosts"
+
+in that hosts file we will specify the "ip-address" of the node machines which we wants to add as a node to the ansible master
+
+To check which machines are added to master 
+
+ansible all -m ping
+It will shows like this
+------------------------------------
+54.165.222.80 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+172.31.95.172 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+--------------------------------------
